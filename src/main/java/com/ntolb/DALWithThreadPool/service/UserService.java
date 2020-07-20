@@ -1,6 +1,8 @@
 package com.ntolb.DALWithThreadPool.service;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -27,7 +29,7 @@ public class UserService {
 	public CompletableFuture<List<User>> saveUser(MultipartFile file){
 		
 		long startTime = System.currentTimeMillis();
-		
+		List<User> users = parseCSVFile(file);
 		long endTime = System.currentTimeMillis();
 		
 		
@@ -37,11 +39,25 @@ public class UserService {
 		
 		final List<User> users = new ArrayList<>();
 		try {
-			try (final BufferedReader br = new BufferedReader(new InputStreamReder(fileArg.getInputStream())) {
+			try (final BufferedReader br = new BufferedReader(new InputStreamReader(fileArg.getInputStream()))) {
 				String line;
-				while ((br.))
+				while ((line = br.readLine()) != null) {
+					final String [] data = line.split(",");
+					final User user = new User();
+					user.setName(data[0]);
+					user.setEmail(data[1]);
+					user.setGender(data[2]);
+					users.add(user);
+				}
+				
+				return users;	
 			}
-			return users;
+			
 		
+		}catch (final IOException e) {
+			
+			logger.error("failed to parse CSV file{}",e);
+			throw new Exception("failed to parse CSV file{}",e);
 		}
+	}
 }
