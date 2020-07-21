@@ -1,6 +1,7 @@
 package com.ntolb.DALWithThreadPool.service;
 
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +27,7 @@ public class UserService {
 	Object target;
 	Logger logger =LoggerFactory.getLogger(UserService.class);
 	
+	@Async
 	public CompletableFuture<List<User>> saveUser(MultipartFile file) throws Exception{
 		
 		long startTime = System.currentTimeMillis();
@@ -34,10 +36,19 @@ public class UserService {
 		users = repository.saveAll(users);
 		long endTime = System.currentTimeMillis();
 		logger.info("TOTAL TIME: {}", (endTime-startTime));
-		return CompletableFuture.completedFuture(users);
-		
-		
+		return CompletableFuture.completedFuture(users);	
 	}
+	
+	
+	@Async
+	public CompletableFuture<List<User>> findAllUsers() {
+		
+		List<User> users = repository.findAll();
+		logger.info("Finding all users on thread {}", Thread.currentThread().getName());
+		return CompletableFuture.completedFuture(users);
+	}
+	
+	
 	private List<User> parseCSVFile(final MultipartFile fileArg) throws Exception{
 		
 		final List<User> users = new ArrayList<>();
