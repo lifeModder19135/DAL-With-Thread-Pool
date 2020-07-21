@@ -1,6 +1,6 @@
 package com.ntolb.DALWithThreadPool.service;
 
-import java.io.BufferedReader;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -26,12 +26,15 @@ public class UserService {
 	Object target;
 	Logger logger =LoggerFactory.getLogger(UserService.class);
 	
-	public CompletableFuture<List<User>> saveUser(MultipartFile file){
+	public CompletableFuture<List<User>> saveUser(MultipartFile file) throws Exception{
 		
 		long startTime = System.currentTimeMillis();
 		List<User> users = parseCSVFile(file);
+		logger.info("Saving list of users of size {}", users.size(), "" + Thread.currentThread().getName());
+		users = repository.saveAll(users);
 		long endTime = System.currentTimeMillis();
-		
+		logger.info("TOTAL TIME: {}", (endTime-startTime));
+		return CompletableFuture.completedFuture(users);
 		
 		
 	}
